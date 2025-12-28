@@ -1,4 +1,5 @@
 import numpy as np
+from .neighbor_indices import get_neighbor_indices
 from .point_types import REGULAR, MAXIMUM, MINIMUM, BOTH, SPLIT, JOIN
 
 
@@ -26,16 +27,6 @@ class CornerAnalyzer:
     }
 
     @staticmethod
-    def get_neighbor_indices(center_index, grid_width):
-        up_index = center_index + grid_width
-        right_index = center_index + 1
-        bottom_right_index = center_index - grid_width + 1
-        down_index = center_index - grid_width
-        left_index = center_index - 1
-        top_left_index = center_index + grid_width - 1
-        return (up_index, right_index, bottom_right_index, down_index, left_index, top_left_index)
-
-    @staticmethod
     def analyze_corner(scalars, width, height, point_types, critical_flags, link_masks, neighbor_masks, corner_name):
         corner_row, corner_col, neighbor_slots, neighbor_mask, corner_lookup = CornerAnalyzer.CORNER_SPECS[corner_name]
 
@@ -44,7 +35,7 @@ class CornerAnalyzer:
         center_index = (y_index * width) + x_index
 
         center_value = scalars[center_index]
-        all_neighbors = CornerAnalyzer.get_neighbor_indices(center_index, width)
+        all_neighbors = get_neighbor_indices(center_index, width)
 
         center_lookup_index, center_link_mask = 0, 0
 

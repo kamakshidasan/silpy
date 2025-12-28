@@ -1,17 +1,10 @@
 from .point_types import get_point_type
 from ..point.point import Point
+from .neighbor_indices import get_neighbor_indices
+
 
 
 class PointProcessor:
-    @staticmethod
-    def get_neighbor_indices(center_index, grid_width):
-        up_index = center_index + grid_width
-        right_index = center_index + 1
-        bottom_right_index = center_index - grid_width + 1
-        down_index = center_index - grid_width
-        left_index = center_index - 1
-        top_left_index = center_index + grid_width - 1
-        return (up_index, right_index, bottom_right_index, down_index, left_index, top_left_index)
 
     @staticmethod
     def make_components(bit_mask):
@@ -69,7 +62,7 @@ class PointProcessor:
             upper_bits = link_mask & neighbor_mask
             lower_bits = (~link_mask) & neighbor_mask & self.SIX_BIT_MASK
 
-            all_neighbors = self.get_neighbor_indices(point_index, self.width)
+            all_neighbors = get_neighbor_indices(point_index, self.width)
 
             upper_components = self.make_components(upper_bits)
             lower_components = self.make_components(lower_bits)
