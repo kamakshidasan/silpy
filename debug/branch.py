@@ -117,7 +117,7 @@ def visualize_attribute_tree(
     layout_positions = nx.nx_agraph.graphviz_layout(graph, prog="dot")
     nodes = list(graph.nodes)
 
-    if tree.arcs is not None:
+    if hasattr(tree, "arcs"):
         arcs_dict = tree.arcs
         arc_colors = get_color_palette(
             number_of_colors=len(arcs_dict),

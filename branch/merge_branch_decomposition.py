@@ -23,8 +23,18 @@ class MergeBranchDecomposition(BaseBranchDecomposition):
             self.take_snapshots()
 
     def initialize_tree(self):
+
         # in case non-pruned tree is passed
-        self.merge_tree.prune_tree()
+        if not self.merge_tree.prune:
+            self.merge_tree.prune_tree()
+            self.merge_tree.prune = True
+
+            if self.merge_tree.segmentation:
+                self.merge_tree.find_segmentation()
+
+            self.original_tree = self.merge_tree.duplicate()
+
+        self.merge_tree.visualize()
 
         # once you prune the tree, find out the attributes
         self.merge_tree = AttributeTree(self.merge_tree)
@@ -53,19 +63,58 @@ class MergeBranchDecomposition(BaseBranchDecomposition):
         value = branch.value
 
         # we process priority queue lazily
-        if self.merge_tree.has_edge(parent, leaf):
-            self.merge_tree.remove_node(leaf)
-
-            if self.merge_tree.is_degree_two_node(parent):
-                self.merge_tree.reduce_node(parent)
-
-            self.merge_tree.refresh()
-            pair = (leaf, parent)
-            self.record(leaf, parent, value, self.type)
-        else:
+        if not self.merge_tree.has_edge(parent, leaf):
             # find the correct parent now, and push to queue
             [parent] = self.merge_tree.get_parents(leaf)
             self.push_branch(leaf, parent, self.merge_tree)
+            return
+
+        self.remove_leaf(leaf, parent)
+        self.reduce_parent(parent)
+
+        self.record(leaf, parent, value, self.type)
+
+    def remove_leaf(self, leaf, parent):
+        # find the current attribute and add it to the node
+        # in case there is a multi-saddle, adding it to the node will help us
+        if self.merge_tree.segmentation:
+            leaf_attribute = self.merge_tree.get_attribute(parent, leaf, self.scheme)
+            self.merge_tree.nodes[parent][self.scheme] += leaf_attribute
+
+        # now remove the leaf
+        self.merge_tree.remove_node(leaf)
+
+    def reduce_parent(self, parent):
+        # if the parent is degree-2, then it can be removed
+        if not self.merge_tree.is_degree_two_node(parent):
+            return
+
+        # we know that the parent is a degree-2
+        # so definitely only one grandparent and child exist
+        grandparent = self.merge_tree.get_parents(parent)[0]
+        child = self.merge_tree.get_children(parent)[0]
+
+        if self.merge_tree.segmentation:
+            # get the attribute of grandparent-parent and parent-child
+            grandparent_attribute = self.merge_tree.get_attribute(grandparent, parent, self.scheme)
+            child_attribute = self.merge_tree.get_attribute(parent, child, self.scheme)
+
+            # grandparent-child edge attributes
+            new_attribute = grandparent_attribute + child_attribute
+
+            # in case parent was a multi-saddle, it will have some residual value that needs to be added
+            parent_attribute = self.merge_tree.nodes[parent][self.scheme]
+            new_attribute = new_attribute + parent_attribute
+        else:
+            new_attribute = abs(grandparent.scalar - child.scalar)
+
+        # ---------------------
+        # reduce the parent, because it was degree-2
+        self.merge_tree.reduce_node(parent)
+        # ---------------------
+
+        # only this edge would have changed, change its attribute
+        self.merge_tree[grandparent][child][self.scheme] = new_attribute
 
 
     def compute_trunk_pair(self):

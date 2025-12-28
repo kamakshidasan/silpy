@@ -21,6 +21,7 @@ class AttributeTree(BaseTree, TreeWrapper):
         self.__dict__.update(source.__dict__)
 
         self.add_nodes_from(source.nodes(data=True))
+        self.initialize_node_attributes()
 
         for start_node, end_node in source.edges():
             attributes = self.compute_attributes(start_node, end_node)
@@ -41,14 +42,12 @@ class AttributeTree(BaseTree, TreeWrapper):
                 edge_attribute_values[(start_node, end_node)] = self[start_node][end_node][attribute_name]
             return edge_attribute_values
 
-    def refresh(self):
-        self.update_arcs()
+    def initialize_node_attributes(self):
+        for node in self.nodes():
+            self.nodes[node]["height"] = 0
+            self.nodes[node]["volume"] = 0
+            self.nodes[node]["hypervolume"] = 0
 
-        new_attributes = {}
-        for start_node, end_node in self.edges():
-            attributes = self.compute_attributes(start_node, end_node)
-            new_attributes[(start_node, end_node)] = attributes
-        nx.set_edge_attributes(self, new_attributes)
 
     # I thought for a long time whether to place this prune stuff
     # directly in the tree, but it just didn't feel right
@@ -71,6 +70,16 @@ class AttributeTree(BaseTree, TreeWrapper):
             else:
                 self.arcs = Segmentation.find_contour_tree_segmentation(self)
 
+    def refresh(self):
+        self.update_arcs()
+
+        new_attributes = {}
+        for start_node, end_node in self.edges():
+            attributes = self.compute_attributes(start_node, end_node)
+            new_attributes[(start_node, end_node)] = attributes
+        nx.set_edge_attributes(self, new_attributes)
+
+
     def compute_attributes(self, node_a, node_b):
         attributes = {}
         attributes["height"] = abs(node_a.scalar - node_b.scalar)
@@ -82,5 +91,8 @@ class AttributeTree(BaseTree, TreeWrapper):
 
     def visualize(self, edge_attribute='height', pairs=None, label=None, reverse=False, use_node_type_colors=True, node_size=500, font_size=6, edge_width=4.0):
         tree = nx.DiGraph(self) # yeesh
-        tree.arcs = self.arcs
+
+        if hasattr(self, "arcs"):
+            tree.arcs = self.arcs
+
         visualize_attribute_tree(tree, edge_attribute, pairs, label, reverse, use_node_type_colors, node_size, font_size, edge_width)
