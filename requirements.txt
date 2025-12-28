@@ -1,0 +1,14 @@
+pyvista[all,trame,jupyter]
+ipywidgets
+ipyvtklink
+notebook
+jupyter_server_proxy
+trame-jupyter-extension
+networkx
+pymeshfix
+scikit-learn
+seaborn
+glasbey
+shutup
+tqdm
+tqdm_joblib
