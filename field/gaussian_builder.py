@@ -1,15 +1,15 @@
-# gaussian_builder.py
 import numpy as np
 import random
 
 class GaussianBuilder:
     @staticmethod
-    def create_gaussian(grid_x, grid_y, center_position, sigma_value):
+    def create_gaussian(grid_x, grid_y, center, sigma):
         # Compute a 2D Gaussian at each grid point
-        gaussian_map = np.exp(
-            -(((grid_x - center_position[0])**2 + (grid_y - center_position[1])**2) /
-               (2 * sigma_value**2))
-        )
+        center_x, center_y = center[0], center[1]
+        delta_x, delta_y = grid_x - center_x, grid_y - center_y
+        squared_distance = delta_x**2 + delta_y**2
+        denominator = 2 * (sigma**2)
+        gaussian_map = np.exp(-(squared_distance / denominator))
         return gaussian_map.astype(np.float32)
 
     @staticmethod
@@ -20,62 +20,43 @@ class GaussianBuilder:
         return np.meshgrid(x_coordinates, y_coordinates)
 
     @staticmethod
-    def sample_random_center_and_sigma(width, height, minimum_sigma, maximum_sigma):
-        # Sample a random center within bounds and a random sigma
+    def sample_random_parameters(width, height, minimum_sigma, maximum_sigma):
+        # Sample random Gaussian parameters
         random_center_x = np.float32(random.randint(0, width - 1))
         random_center_y = np.float32(random.randint(0, height - 1))
         random_sigma = np.float32(random.uniform(minimum_sigma, maximum_sigma))
         return (random_center_x, random_center_y), random_sigma
 
     @staticmethod
-    def normalize_array(array, minimum_value, maximum_value):
-        # Normalize array to a new range [minimum_value, maximum_value]
-        array_minimum = array.min()
-        array_maximum = array.max()
-        if array_maximum == array_minimum:
-            return np.zeros_like(array, dtype=np.float32)
+    def normalize_grid(grid, grid_minimum, grid_maximum):
+        # Normalize grid to a new range [grid_minimum, grid_maximum]
+        current_minimum, current_maximum = grid.min(), grid.max()
+        normalized_grid = (grid - current_minimum) / (current_maximum - current_minimum)
+        scaled_grid = normalized_grid * (grid_maximum - grid_minimum) + grid_minimum
+        return scaled_grid.astype(np.float32)
 
-        normalized = (array - array_minimum) / (array_maximum - array_minimum)
-        scaled = normalized * (maximum_value - minimum_value) + minimum_value
-        return scaled.astype(np.float32)
-
-    @classmethod
-    def generate_random_gaussians(
-        cls,
-        num_gaussians,
-        width,
-        height,
-        minimum_sigma,
-        maximum_sigma,
-        mode='positive'
-    ):
+    @staticmethod
+    def generate_random_gaussians(num_gaussians, width, height, minimum_sigma, maximum_sigma, mode="positive"):
         # Generate multiple random Gaussians in positive, negative, or mixed modes
-        if mode not in ('positive', 'negative', 'mixed'):
-            raise ValueError(f'Unknown mode: {mode}')
-
         output_array = np.zeros((height, width), dtype=np.float32)
-        grid_x, grid_y = cls.generate_meshgrid(width, height)
+        grid_x, grid_y = GaussianBuilder.generate_meshgrid(width, height)
 
         # Prepare sign sequence based on mode
-        if mode == 'positive':
-            sign_sequence = [1] * num_gaussians
-            normalization_range = (0.0, 1.0)
-        elif mode == 'negative':
-            sign_sequence = [-1] * num_gaussians
-            normalization_range = (-1.0, 0.0)
+        if mode == "positive":
+            sign_sequence = random.choices([1], k=num_gaussians)
+            normalization_range = (np.float32(0.0), np.float32(1.0))
+        elif mode == "negative":
+            sign_sequence = random.choices([-1], k=num_gaussians)
+            normalization_range = (np.float32(-1.0), np.float32(0.0))
         else:
-            sign_sequence = [random.choice([1, -1]) for _ in range(num_gaussians)]
-            normalization_range = (-1.0, 1.0)
+            sign_sequence = random.choices([1, -1], k=num_gaussians)
+            normalization_range = (np.float32(-1.0), np.float32(1.0))
 
         # Accumulate Gaussians with corresponding signs
-        for sign in sign_sequence:
-            center_position, sigma_value = cls.sample_random_center_and_sigma(
-                width, height, minimum_sigma, maximum_sigma
-            )
-            gaussian_values = cls.create_gaussian(
-                grid_x, grid_y, center_position, sigma_value
-            )
-            output_array += sign * gaussian_values
+        for sign_value in sign_sequence:
+            center, sigma = GaussianBuilder.sample_random_parameters(width, height, minimum_sigma, maximum_sigma)
+            gaussian_values = GaussianBuilder.create_gaussian(grid_x, grid_y, center, sigma)
+            output_array += sign_value * gaussian_values
 
-        min_norm, max_norm = normalization_range
-        return cls.normalize_array(output_array, min_norm, max_norm)
+        grid_minimum, grid_maximum = normalization_range
+        return GaussianBuilder.normalize_grid(output_array, grid_minimum, grid_maximum)

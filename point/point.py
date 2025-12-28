@@ -20,24 +20,7 @@ class Point(PointChecker):
         self.split_index = None
         self.contour_index = None
 
-        self.order = None
         self.boundary = False
-
-
-        # this is used in morse-smale complex
-        self.cofacets = set()
-        self.pair = None
-        self.pair_direction = None
-        self.weight = None
-        self.pair_candidates = []
-        self.dimension = 0
-
-
-        # ttk
-        self.star = set()
-        self.multiplicity = None
-        self.is_multi_saddle = None
-        self.critical_point = None
 
 
     def __str__(self):
@@ -51,8 +34,6 @@ class Point(PointChecker):
             f"Split index: {self.split_index}\n"
             f"Join index: {self.join_index}\n"
             f"Type: {self.type.capitalize() if self.type else 'None'}\n"
-
-            f"Order: {self.order if self.order else 'None'}\n"
         )
 
     def __repr__(self):
