@@ -7,7 +7,7 @@ from ..branch.branch import BranchQueue, BranchCollection, Branch
 from ..debug.branch import visualize_tree_pairs
 
 class MergeBranchDecomposition(BaseBranchDecomposition):
-    def __init__(self, merge_tree, scheme='height', take_snapshots=True):
+    def __init__(self, merge_tree, scheme='height'):
         super().__init__(scheme=scheme)
 
         self.merge_tree = merge_tree.duplicate()
@@ -18,9 +18,6 @@ class MergeBranchDecomposition(BaseBranchDecomposition):
         self.initialize_queue()
         self.compute_pairs()
         self.restore_structures()
-
-        if take_snapshots:
-            self.take_snapshots()
 
     def initialize_tree(self):
         # in case non-pruned tree is passed
@@ -78,33 +75,9 @@ class MergeBranchDecomposition(BaseBranchDecomposition):
         value = self.merge_tree.get_attribute(root, child, self.scheme)
         self.record(root, child, value, self.type)
 
-    # -------------------------------------------------------------------
-    # Everything after this line is for taking snapshots
-
-
-    def trees(self):
-        return [self.merge_tree]
 
     def restore_structures(self):
         # go back to original state
         self.merge_tree = self.original_tree
         self.merge_tree = AttributeTree(self.merge_tree)
         self.primary_tree = self.merge_tree
-
-
-    def duplicate(self):
-        cloned = self.__class__.__new__(self.__class__)
-        Tree.__init__(cloned)
-        cloned.merge_tree = self.merge_tree.duplicate()
-        cloned.type = self.type
-        cloned.original_tree = self.original_tree
-        cloned.scheme = self.scheme
-        cloned.primary_tree = cloned.merge_tree # for visualization
-        return cloned
-
-
-    # i want
-    def visualize_snapshots(self, *positional_arguments, **keyword_arguments):
-        # make sure we only use the merge tree, but yeesh
-        keyword_arguments['tree_type'] = 'merge'
-        return super().visualize_snapshots(*positional_arguments, **keyword_arguments)

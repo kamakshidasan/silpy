@@ -41,6 +41,13 @@ class AttributeTree(BaseTree, TreeWrapper):
                 edge_attribute_values[(start_node, end_node)] = self[start_node][end_node][attribute_name]
             return edge_attribute_values
 
+    def update_arcs(self):
+        if self.segmentation:
+            if is_merge(self.type):
+                self.arcs = Segmentation.find_merge_tree_segmentation(self)
+            else:
+                self.arcs = Segmentation.find_contour_tree_segmentation(self)
+
     def refresh(self):
         self.update_arcs()
 
@@ -49,6 +56,7 @@ class AttributeTree(BaseTree, TreeWrapper):
             attributes = self.compute_attributes(start_node, end_node)
             new_attributes[(start_node, end_node)] = attributes
         nx.set_edge_attributes(self, new_attributes)
+        print("trying to refresh")
 
     # I thought for a long time whether to place this prune stuff
     # directly in the tree, but it just didn't feel right
@@ -63,13 +71,6 @@ class AttributeTree(BaseTree, TreeWrapper):
         self.refresh()
 
         return self
-
-    def update_arcs(self):
-        if self.segmentation:
-            if is_merge(self.type):
-                self.arcs = Segmentation.find_merge_tree_segmentation(self)
-            else:
-                self.arcs = Segmentation.find_contour_tree_segmentation(self)
 
     def compute_attributes(self, node_a, node_b):
         attributes = {}
