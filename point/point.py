@@ -2,7 +2,6 @@ import numbers
 from ..checker.point_checker import PointChecker
 from ..formatter.value_formatter import ValueFormatter
 from ..debug.point import plot_point
-from ..debug.link import visualize_point_link_2d, visualize_point_link_circle
 
 class Point(PointChecker):
     def __init__(self, index, scalar, coordinates):
@@ -86,11 +85,8 @@ class Point(PointChecker):
         raw_value = self[attribute_name]
         return ValueFormatter.format(raw_value)
 
-    def visualize(self, two_dimensional=True):
-        if two_dimensional:
-            visualize_point_link_2d(self)
-        else:
-            visualize_point_link_circle(self)
+    def visualize(self):
+        visualize_point_link_2d(self)
 
     def plot(self, mesh, sphere_radius=0.1):
         return plot_point(mesh, self, sphere_radius=sphere_radius)

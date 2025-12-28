@@ -1,7 +1,7 @@
 from itertools import chain
 import pyvista as pv
 
-from . import branch, checker, debug, denoising, distances, field, formatter, hierarchy, heap, manager, partition, pathfinder, point, simplification, tests, tree
+from . import branch, checker, debug, denoising, distances, field, formatter, hierarchy, heap, manager, pathfinder, point, simplification, tests, tree
 
 from .branch import *
 from .checker import *
@@ -13,7 +13,6 @@ from .formatter import *
 from .hierarchy import *
 from .heap import *
 from .manager import *
-from .partition import *
 from .pathfinder import *
 from .point import *
 from .simplification import *
@@ -34,7 +33,6 @@ __all__ = list(
         hierarchy.__all__,
         heap.__all__,
         manager.__all__,
-        partition.__all__,
         pathfinder.__all__,
         point.__all__,
         simplification.__all__,

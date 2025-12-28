@@ -27,7 +27,6 @@ __all__ = [
     "visualize_pairs_bar_graph",
     "visualize_pairs_scatter_plot",
     "visualize_point_link_2d",
-    "visualize_point_link_circle",
     "visualize_points_with_neighbors",
     "visualize_tree",
     "visualize_tree_pairs",
