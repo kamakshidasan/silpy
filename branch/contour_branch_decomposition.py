@@ -6,24 +6,20 @@ from ..branch.branch import BranchQueue, BranchCollection, Branch
 from ..debug.branch import visualize_tree_pairs
 
 class ContourBranchDecomposition(BaseBranchDecomposition):
-    def __init__(self, contour_tree, scheme='height'):
+    def __init__(self, contour_tree, scheme='height', take_snapshots=True):
         super().__init__(scheme=scheme)
 
         self.contour_tree = contour_tree.duplicate()
         self.type = contour_tree.type
         self.original_tree = contour_tree
 
-        print("initialize tree")
         self.initialize_tree()
-
-        print("initialize queue")
         self.initialize_queue()
-
-        print("compute pairs")
         self.compute_pairs()
-
-        print("restore structures")
         self.restore_structures()
+
+        if take_snapshots:
+            self.take_snapshots()
 
     def initialize_tree(self):
         self.contour_tree.prune_trees()
@@ -48,14 +44,10 @@ class ContourBranchDecomposition(BaseBranchDecomposition):
 
     def compute_pairs(self):
         while self.queue:
-            print(len(self.queue))
             branch = self.queue.pop()
             self.peel_branch(branch)
 
-        print("compute trunk pair")
         self.compute_trunk_pair()
-
-        print("finalize")
         self.finalize_pairs()
 
 
@@ -120,6 +112,18 @@ class ContourBranchDecomposition(BaseBranchDecomposition):
             self.record(trunk_root, trunk_leaf, trunk_value, tree_type)
 
 
+    # -------------------------------------------------------------------
+    # Everything after this line is for taking snapshots
+
+
+    def trees(self):
+        return [
+            self.contour_tree,
+            self.contour_tree.join_tree,
+            self.contour_tree.split_tree
+        ]
+
+
     def restore_structures(self):
         self.contour_tree = self.original_tree
 
@@ -131,3 +135,16 @@ class ContourBranchDecomposition(BaseBranchDecomposition):
         self.join_tree = self.contour_tree.join_tree
         self.split_tree = self.contour_tree.split_tree
         self.primary_tree = self.contour_tree
+
+
+    def duplicate(self):
+        cloned = self.__class__.__new__(self.__class__)
+        Tree.__init__(cloned)
+        cloned.contour_tree = self.contour_tree.duplicate()
+        cloned.type = self.type
+        cloned.original_tree = self.original_tree
+        cloned.scheme = self.scheme
+        cloned.join_tree = cloned.contour_tree.join_tree
+        cloned.split_tree = cloned.contour_tree.split_tree
+        cloned.primary_tree = self.contour_tree # for visualization
+        return cloned
