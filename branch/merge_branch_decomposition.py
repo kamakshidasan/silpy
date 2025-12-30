@@ -7,38 +7,36 @@ from ..branch.branch import BranchQueue, BranchCollection, Branch
 from ..debug.branch import visualize_tree_pairs
 
 class MergeBranchDecomposition(BaseBranchDecomposition):
-    def __init__(self, merge_tree, scheme='height', take_snapshots=True):
+    def __init__(self, merge_tree, scheme='height'):
         super().__init__(scheme=scheme)
 
         self.merge_tree = merge_tree.duplicate()
         self.type = merge_tree.type
-        self.original_tree = merge_tree
 
         self.initialize_tree()
         self.initialize_queue()
         self.compute_pairs()
         self.restore_structures()
 
-        if take_snapshots:
-            self.take_snapshots()
-
     def initialize_tree(self):
-
-        # in case non-pruned tree is passed
+        # we *need* to prune a merge tree for branch decomposition
         if not self.merge_tree.prune:
             self.merge_tree.prune_tree()
-            self.merge_tree.prune = True
 
+            # if it was segmented before pruning -> need to recompute it
             if self.merge_tree.segmentation:
                 self.merge_tree.find_segmentation()
 
-            self.original_tree = self.merge_tree.duplicate()
+        # attached to merge tree, so that it can be passed to attribute tree
+        self.merge_tree.volume = self.needs_volume()
 
-        self.merge_tree.visualize()
+        # if branch decomposition needs volume and still not segmented
+        if self.merge_tree.volume and not self.merge_tree.segmentation:
+            self.merge_tree.find_segmentation()
 
-        # once you prune the tree, find out the attributes
+        # after all states
+        self.original_tree = self.merge_tree.duplicate()
         self.merge_tree = AttributeTree(self.merge_tree)
-
 
     def initialize_queue(self):
         self.queue.clear()
@@ -77,7 +75,7 @@ class MergeBranchDecomposition(BaseBranchDecomposition):
     def remove_leaf(self, leaf, parent):
         # find the current attribute and add it to the node
         # in case there is a multi-saddle, adding it to the node will help us
-        if self.merge_tree.segmentation:
+        if self.merge_tree.volume:
             leaf_attribute = self.merge_tree.get_attribute(parent, leaf, self.scheme)
             self.merge_tree.nodes[parent][self.scheme] += leaf_attribute
 
@@ -94,7 +92,7 @@ class MergeBranchDecomposition(BaseBranchDecomposition):
         grandparent = self.merge_tree.get_parents(parent)[0]
         child = self.merge_tree.get_children(parent)[0]
 
-        if self.merge_tree.segmentation:
+        if self.merge_tree.volume:
             # get the attribute of grandparent-parent and parent-child
             grandparent_attribute = self.merge_tree.get_attribute(grandparent, parent, self.scheme)
             child_attribute = self.merge_tree.get_attribute(parent, child, self.scheme)
@@ -127,33 +125,9 @@ class MergeBranchDecomposition(BaseBranchDecomposition):
         value = self.merge_tree.get_attribute(root, child, self.scheme)
         self.record(root, child, value, self.type)
 
-    # -------------------------------------------------------------------
-    # Everything after this line is for taking snapshots
-
-
-    def trees(self):
-        return [self.merge_tree]
 
     def restore_structures(self):
         # go back to original state
         self.merge_tree = self.original_tree
         self.merge_tree = AttributeTree(self.merge_tree)
         self.primary_tree = self.merge_tree
-
-
-    def duplicate(self):
-        cloned = self.__class__.__new__(self.__class__)
-        Tree.__init__(cloned)
-        cloned.merge_tree = self.merge_tree.duplicate()
-        cloned.type = self.type
-        cloned.original_tree = self.original_tree
-        cloned.scheme = self.scheme
-        cloned.primary_tree = cloned.merge_tree # for visualization
-        return cloned
-
-
-    # i want
-    def visualize_snapshots(self, *positional_arguments, **keyword_arguments):
-        # make sure we only use the merge tree, but yeesh
-        keyword_arguments['tree_type'] = 'merge'
-        return super().visualize_snapshots(*positional_arguments, **keyword_arguments)

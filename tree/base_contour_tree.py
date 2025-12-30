@@ -21,7 +21,9 @@ class BaseContourTree(Tree):
         self.initialize_structures()
         self.reduce_all_leaves()
         self.restore_structures()
-        self.find_segmentation()
+
+        if self.segmentation:
+            self.find_segmentations()
 
     def initialize_structures(self):
         # you can initially set the segmentation to False
@@ -104,6 +106,9 @@ class BaseContourTree(Tree):
 
         self.manager.set_mandatory_points(self.type, non_degree_two_nodes)
 
+        # if called from outside
+        self.prune = True
+
     def restore_structures(self):
         self.join_tree = self.original_join_tree
         self.split_tree = self.original_split_tree
@@ -112,12 +117,13 @@ class BaseContourTree(Tree):
         del self.original_join_tree, self.original_split_tree
 
 
-    def find_segmentation(self):
-        if self.segmentation:
-            self.arcs = Segmentation.find_contour_tree_segmentation(self)
+    def find_segmentations(self):
+        self.arcs = Segmentation.find_contour_tree_segmentation(self)
 
-            for merge_tree in [self.join_tree, self.split_tree]:
-                # if you don't specify segmentation
-                # you wont get attribute tree properly
-                merge_tree.segmentation = self.segmentation
-                merge_tree.arcs = Segmentation.find_merge_tree_segmentation(merge_tree)
+        # so always you will have merge tree segmentations
+        # just remember these are the semi-pruned merge tree segmentations
+        for merge_tree in [self.join_tree, self.split_tree]:
+            merge_tree.find_segmentation()
+
+        # if called from outside
+        self.segmentation = True

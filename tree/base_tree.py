@@ -52,11 +52,11 @@ class BaseTree:
 
 ########################################################
 
-    def check(self):
+    def check(self, **kwargs):
         if is_merge(self.type):
-            return MergeTreeChecker(self).is_merge_tree()
+            return MergeTreeChecker(self).is_merge_tree(**kwargs)
         else:
-            return ContourTreeChecker(self).is_contour_tree()
+            return ContourTreeChecker(self).is_contour_tree(**kwargs)
 
 ########################################################
 

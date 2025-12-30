@@ -50,5 +50,11 @@ class BaseMergeTree(Tree):
 
         self.manager.set_mandatory_points(self.type, non_degree_two_nodes)
 
+        # if this function is called from outside
+        self.prune = True
+
     def find_segmentation(self):
         self.arcs = Segmentation.find_merge_tree_segmentation(self)
+
+        # if this function is called from outside
+        self.segmentation = True
