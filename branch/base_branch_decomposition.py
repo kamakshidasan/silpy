@@ -1,6 +1,5 @@
 from collections import defaultdict
 from ..tree.tree import Tree
-from ..branch.attribute_tree import AttributeTree
 from ..branch.branch import BranchQueue, BranchCollection, Branch
 from ..debug.branch import visualize_tree_pairs
 

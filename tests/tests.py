@@ -3,6 +3,7 @@ from ..checker.tree_checker import is_join, is_split, is_contour
 from ..tree.tree import Tree
 from ..point.point import Point
 
+
 class MergeTreeChecker(Tree):
     def __init__(self, merge_tree):
         super().__init__()
@@ -155,24 +156,25 @@ class ContourTreeChecker(Tree):
 
 
 class BranchPathChecker:
-    def __init__(self, tree, branch_decomposition):
-        self.tree = tree
-        self.tree_type = self.tree.type
+    def __init__(self, branch_decomposition):
         self.branch_decomposition = branch_decomposition
-        self.setup_path_method()
+        self.tree_type = branch_decomposition.type
+        self.setup_tree()
 
-    def setup_path_method(self):
-        if is_split(self.tree_type):
-            self.path = self.split_path
-        elif is_join(self.tree_type):
-            self.path = self.join_path
-        elif is_contour(self.tree_type):
+    def setup_tree(self):
+        if is_contour(self.tree_type):
+            self.tree = self.branch_decomposition.contour_tree
             self.path = self.contour_path
+        else:
+            self.tree = self.branch_decomposition.merge_tree
+            if is_split(self.tree_type):
+                self.path = self.split_path
+            elif is_join(self.tree_type):
+                self.path = self.join_path
 
     def join_path(self, birth, death):
         return nx.has_path(self.tree, death, birth)
 
-    # just split is different
     def split_path(self, birth, death):
         return nx.has_path(self.tree, birth, death)
 

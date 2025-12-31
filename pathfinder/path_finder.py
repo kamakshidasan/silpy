@@ -32,7 +32,6 @@ def _process_component_batch_indices(task):
 
 
 class PathFinder:
-    # Adhitya: PLEASE PARALLELIZE!
     @staticmethod
     def find_all_monotone_paths(points, link_key, index_key, max_workers=None, batch_size=256, chunksize=16):
         # For each critical point, traverse its upper/lower link to every other critical point,
