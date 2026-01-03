@@ -1,8 +1,15 @@
 from ..debug.manager import plot_mesh_and_points
 
 class CriticalManager:
-    def __init__(self, critical_points):
-        self.critical_points = critical_points
+    def __init__(self, field_data):
+
+        # i really hope this is all i need
+        # i am taking all points so that
+        # i can use it for root-saddle segmentation in merge tree
+        self.points = field_data.points
+        self.critical_points = field_data.critical_points
+        self.mesh = field_data.mesh
+
         self.maximums = []
         self.minimums = []
         self.join_saddles = []
