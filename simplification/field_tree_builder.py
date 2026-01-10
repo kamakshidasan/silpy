@@ -11,6 +11,6 @@ class FieldTreeBuilder:
         self.field_data = FieldAnalyzer(self.field, self.field_name)
         self.points = self.field_data.points
         self.critical_points = self.field_data.critical_points
-        self.critical_manager = CriticalManager(self.critical_points)
+        self.critical_manager = CriticalManager(self.field_data)
         self.tree = ReebTree(self.critical_manager, self.tree_type)
         self.mesh = self.field_data.mesh

@@ -1,5 +1,5 @@
 import networkx as nx
-from ..checker.tree_checker import is_join, is_split, is_contour
+from ..checker.tree_checker import is_join, is_split
 from ..tree.tree import Tree
 from ..point.point import Point
 
@@ -71,90 +71,6 @@ class MergeTreeChecker(Tree):
         return all([same_roots, same_leaves, heap_ordered, connected, single_heap, valid_internal_merge_nodes])
 
 
-class ContourTreeChecker(Tree):
-    def __init__(self, contour_tree):
-        super().__init__()
-        self.contour_tree = contour_tree
-        self.manager = contour_tree.manager
-
-    def is_valid_internal_contour_node(self, node):
-        in_degree_count = self.contour_tree.in_degree(node)
-        out_degree_count = self.contour_tree.out_degree(node)
-        return 1 <= in_degree_count <= 2 and 1 <= out_degree_count <= 2
-
-    def is_directed_acyclic(self):
-        return nx.is_directed_acyclic_graph(self.contour_tree)
-
-    def is_connected_undirected(self):
-        return len(list(nx.connected_components(self.contour_tree.to_undirected()))) == 1
-
-    def is_max_heap_ordered(self):
-        return self.contour_tree.is_max_heap()
-
-    def has_valid_internal_contour_nodes(self):
-        return all(
-            self.is_valid_internal_contour_node(internal_node)
-            for internal_node in self.contour_tree.get_internal_nodes()
-        )
-
-    def has_same_roots(self, critical_points):
-        expected_roots = {point for point in critical_points if point.is_maximum()}
-        return set(self.contour_tree.get_roots()) == expected_roots
-
-    def has_same_leaves(self, critical_points):
-        expected_leaves = {point for point in critical_points if point.is_minimum()}
-        return set(self.contour_tree.get_leaves()) == expected_leaves
-
-    def is_join_merge_tree(self):
-        return MergeTreeChecker(self.contour_tree.join_tree).is_merge_tree()
-
-    def is_split_merge_tree(self):
-        return MergeTreeChecker(self.contour_tree.split_tree).is_merge_tree()
-
-    def is_contour_tree(self, multi=False, strict=False, debug=False):
-        directed_acyclic = self.is_directed_acyclic()
-        connected_undirected = self.is_connected_undirected()
-        max_heap_ordered = self.is_max_heap_ordered()
-
-        if multi:
-            valid_internal_contour_nodes = True
-        else:
-            valid_internal_contour_nodes = self.has_valid_internal_contour_nodes()
-
-        base_checks = directed_acyclic and connected_undirected and max_heap_ordered and valid_internal_contour_nodes
-
-        if debug:
-            print("Directed acyclic:", directed_acyclic)
-            print("Connected (undirected):", connected_undirected)
-            print("Max-heap ordered:", max_heap_ordered)
-            print("Valid internal contour nodes:", valid_internal_contour_nodes)
-            print("Base checks passed:", base_checks)
-
-        if not strict:
-            return base_checks
-
-        try:
-            critical_points = self.manager.contour_critical_points
-        except AttributeError:
-            return base_checks
-
-        same_roots = self.has_same_roots(critical_points)
-        same_leaves = self.has_same_leaves(critical_points)
-        is_join_merge_tree = self.is_join_merge_tree()
-        is_split_merge_tree = self.is_split_merge_tree()
-
-        merge_checks = same_roots and same_leaves and is_join_merge_tree and is_split_merge_tree
-
-        if debug:
-            print("Same roots (expected maxima):", same_roots)
-            print("Same leaves (expected minima):", same_leaves)
-            print("Join tree is a merge tree:", is_join_merge_tree)
-            print("Split tree is a merge tree:", is_split_merge_tree)
-            print("Merge checks passed:", merge_checks)
-
-        return base_checks and merge_checks
-
-
 class BranchPathChecker:
     def __init__(self, branch_decomposition):
         self.branch_decomposition = branch_decomposition
@@ -162,24 +78,17 @@ class BranchPathChecker:
         self.setup_tree()
 
     def setup_tree(self):
-        if is_contour(self.tree_type):
-            self.tree = self.branch_decomposition.contour_tree
-            self.path = self.contour_path
-        else:
-            self.tree = self.branch_decomposition.merge_tree
-            if is_split(self.tree_type):
-                self.path = self.split_path
-            elif is_join(self.tree_type):
-                self.path = self.join_path
+        self.tree = self.branch_decomposition.merge_tree
+        if is_split(self.tree_type):
+            self.path = self.split_path
+        elif is_join(self.tree_type):
+            self.path = self.join_path
 
     def join_path(self, birth, death):
         return nx.has_path(self.tree, death, birth)
 
     def split_path(self, birth, death):
         return nx.has_path(self.tree, birth, death)
-
-    def contour_path(self, birth, death):
-        return nx.has_path(self.tree, death, birth)
 
     def all_paths_exist(self):
         for birth, death in self.branch_decomposition.branches.pairs:

@@ -74,18 +74,14 @@ class BranchHierarchy(Toporerry):
         return self.branch_height[branch]
 
     def get_tree(self, branch_decomposition):
-        if self.type == 'contour':
-            return branch_decomposition.contour_tree
-        else:
-            return branch_decomposition.merge_tree
+        return branch_decomposition.merge_tree
 
 
     def path_endpoints(self, branch):
         (birth, death) = branch.birth, branch.death
         edge_order = {
             'join':    (birth, death),
-            'split':   (death, birth),
-            'contour': (birth, death)
+            'split':   (death, birth)
         }
         return edge_order[self.type]
 

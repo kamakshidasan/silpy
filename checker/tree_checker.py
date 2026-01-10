@@ -5,7 +5,6 @@ class TreeChecker:
             return value in allowed_values
         return check
 
-    is_contour = check_value('contour')
     is_merge   = check_value('join', 'split')
     is_join    = check_value('join')
     is_split   = check_value('split')

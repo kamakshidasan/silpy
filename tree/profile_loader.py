@@ -1,17 +1,19 @@
-from .base_tree  import BaseTree
+from .base_tree import BaseTree
 from .base_merge_tree import BaseMergeTree
 
-class ProfileLoader(BaseTree, BaseMergeTree):
-    profile = {}
 
-    def __init__(self, manager, tree_type, contour=False, prune=False, segmentation=True):
-        super().__init__(manager, tree_type, contour, prune, segmentation)
+class ProfileLoader(BaseTree, BaseMergeTree):
+    def __init__(self, manager, type, prune=False, segmentation=True):
+        super().__init__(manager, type, prune, segmentation)
 
     def load_profile(self):
-        points_attribute, scalars_attribute, link_field, index_field, reverse = self.profile[self.contour]
-        critical_points = self.manager[points_attribute]
-        scalar_values   = self.manager[scalars_attribute]
-        if reverse:
-            critical_points = list(reversed(critical_points))
-            scalar_values   = list(reversed(scalar_values))
+        critical_points, scalar_values = self.manager.get_profile(self.type)
+
+        field_mapping = {
+            'join':  ('lower_link', 'join_index'),
+            'split': ('upper_link', 'split_index')
+        }
+
+        link_field, index_field = field_mapping[self.type]
+
         return critical_points, scalar_values, link_field, index_field

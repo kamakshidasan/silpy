@@ -82,67 +82,12 @@ class FieldCutter:
         # make it globally available
         self.patch_indices = arc_indices
 
-    # def create_patch_mesh(self):
-    #     # earlier i was dumping the indices into an array, like this
-    #     # selected_patch_indices = np.array(list(self.patch_indices), dtype=int)
-    #     # but then my friend told me fromiter was more memory efficient
-    #     #selected_patch_indices = np.fromiter(self.patch_indices, dtype=int)
-    #     selected_patch_indices = np.array(list(self.patch_indices), dtype=int)
-    #
-    #     print("selected patch indices")
-    #     print(selected_patch_indices)
-    #
-    #     # i'll figure out a way to put this in like some other global constants file
-    #     persistent_key = "silpyIndex"
-    #
-    #     # build a point mask of all the indices
-    #     # but the point indices i stored originally, is not necessarily
-    #     # the same as the indices in which pyvista stores internally
-    #     # so that's why i created this persistent index array for each point
-    #     # that "travels" along with the points
-    #     # so we're going to find all the original point indices in the next line
-    #
-    #     point_selection_mask = np.isin(
-    #         self.mesh.point_data[persistent_key],
-    #         selected_patch_indices,
-    #         assume_unique=True # i am sure that there will be no repeated indices
-    #     )
-    #
-    #     print("point selection mask")
-    #     print(point_selection_mask[self.extremum_parent.index])
-    #
-    #     print(self.mesh)
-    #
-    #     # extract all the points using those indices
-    #     patch_mesh = self.mesh.extract_points(
-    #         ind=point_selection_mask,
-    #         adjacent_cells=False, # keep only the cells that are touched by only the selected points
-    #         include_cells=True # give me an actual submesh with the cells, not just the points
-    #     )
-    #
-    #
-    #     patch_mesh.plot()
-    #
-    #     # ADHITYA: WARNING!! 15-SEPTEMBER-2025
-    #     # I AM GOING TO BE JUST DOING 2D MESHES AND MAYBE 3D SURFACE MESHES AT THE MOMENT
-    #     # WHEN YOU MOVE TO 3D VOLUMES, THIS extract_surface WILL DEFINITELY NOT WORK
-    #
-    #     # the part where i got stuck was:
-    #     # till now we are looking at polydata, but when i go to 3d it becomes an unstructured grid
-    #     # and there is no implicit way to like cast polydata into grid without some flimsy workarounds
-    #
-    #     # HOWEVER, HERE ARE SOME TIPS:
-    #     # a) MAYBE USE: extract_all_edges
-    #     # b) MAYBE USE: extract_cell_centers: https://docs.pyvista.org/examples/01-filter/cell_centers
-    #
-    #     self.patch_mesh = patch_mesh.extract_surface()
-
     def create_patch_mesh(self):
         selected_patch_indices = np.asarray(list(self.patch_indices), dtype=np.int64)
 
         lines = self.mesh.extract_feature_edges(boundary_edges=True, feature_edges=False, manifold_edges=True, non_manifold_edges=True)
 
-        edges = lines.point_data["silpyIndex"].astype(np.int64)
+        edges = lines.point_data["index"].astype(np.int64)
         edges_mask = np.isin(edges, selected_patch_indices)
 
         self.patch_mesh = lines.extract_points(
@@ -163,13 +108,13 @@ class FieldCutter:
         patch_infinity_mesh = deepcopy(self.patch_mesh)
 
         # use the travelling indices
-        silpy_index_array = patch_infinity_mesh.point_data["silpyIndex"]
+        silpy_index_array = patch_infinity_mesh.point_data["index"]
 
         # the one with lowest/highest order becomes -/+ infinity
         # we compute this on the patch that has order, so it would be defined
         order_array = patch_infinity_mesh.point_data["order"]
 
-        # build a dictionary that maps silpyIndex values to their positions
+        # build a dictionary that maps index values to their positions
         silpy_index_map = {value: position for position, value in enumerate(silpy_index_array)}
 
         # store the index of the removable_parent

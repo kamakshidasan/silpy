@@ -17,7 +17,6 @@ class Point(PointChecker):
         # I'm going to store split/join index here
         self.join_index = None
         self.split_index = None
-        self.contour_index = None
 
         self.boundary = False
 

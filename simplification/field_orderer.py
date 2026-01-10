@@ -16,8 +16,8 @@ class FieldOrderer:
         invert = is_maximum
 
         # use the travelling indices
-        # build a dictionary that maps silpyIndex values to their positions
-        silpy_index_array = field.mesh.point_data["silpyIndex"]
+        # build a dictionary that maps index values to their positions
+        silpy_index_array = field.mesh.point_data["index"]
         silpy_index_map = {value: position for position, value in enumerate(silpy_index_array)}
 
         def enqueue_point(point):

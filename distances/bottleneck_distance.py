@@ -1,5 +1,5 @@
 import networkx as nx
-from ..branch.branch_decomposition import MergeBranchDecomposition, ContourBranchDecomposition
+from ..branch.branch_decomposition import MergeBranchDecomposition
 
 class BottleneckDistance:
     def __init__(self, input1, input2):
@@ -90,7 +90,7 @@ class BottleneckDistance:
 
     def print_matching(self):
         def get_label(input_obj, pairs, index):
-            if isinstance(input_obj, (MergeBranchDecomposition, ContourBranchDecomposition)):
+            if isinstance(input_obj, (MergeBranchDecomposition)):
                 item = input_obj.branches.items[index]
                 return repr(item)
             return repr(pairs[index])
@@ -118,7 +118,7 @@ class BottleneckDistance:
     @staticmethod
     def _extract_pairs(input):
         # Detect BranchDecomposition instances
-        if isinstance(input, (MergeBranchDecomposition, ContourBranchDecomposition)):
+        if isinstance(input, (MergeBranchDecomposition)):
             items = input.branches.items
             pairs = []
             for item in items:

@@ -10,12 +10,12 @@ from ..debug.branch import visualize_attribute_tree
 # TreeWrapper keeps the same init signature as BaseTree,
 # so AttributeTree can forward arguments properly
 class TreeWrapper(Tree):
-    def __init__(self, manager, tree_type, contour, prune, segmentation):
+    def __init__(self, manager, tree_type, prune, segmentation):
         super().__init__(tree_type)
 
 class AttributeTree(BaseTree, TreeWrapper):
     def __init__(self, source):
-        super().__init__(source.manager, source.type, source.contour, source.prune, source.segmentation)
+        super().__init__(source.manager, source.type, source.prune, source.segmentation)
 
         # copy all attributes from source into self
         self.__dict__.update(source.__dict__)

@@ -95,7 +95,7 @@ class FieldSimplification:
         # that should be changed to the orders we removed
 
         local_orders_on_patch = patch_field.mesh.point_data['order']
-        global_indices_on_patch = patch_field.mesh.point_data['silpyIndex'].astype(int)
+        global_indices_on_patch = patch_field.mesh.point_data['index'].astype(int)
 
         saddle_global_index = int(removable_parent.index)
 
@@ -131,7 +131,7 @@ class FieldSimplification:
 
 
     def flatten_scalars_to_saddle(self, original_field, array_name):
-        segment_global_indices = self.patch_field.mesh.point_data['silpyIndex'].astype(int)
+        segment_global_indices = self.patch_field.mesh.point_data['index'].astype(int)
         saddle_global_index = int(self.removable_parent.index)
 
         updated_mesh = deepcopy(original_field.mesh)

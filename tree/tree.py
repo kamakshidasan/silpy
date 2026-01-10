@@ -71,6 +71,11 @@ class Tree(nx.DiGraph):
             return []
         return list(self.successors(node))
 
+    def get_neighbors(self, node):
+        if node not in self.nodes:
+            return []
+        return self.get_parents(node) + self.get_children(node)
+
     def get_leaves(self):
         nodes = [node for node in self.nodes if self.is_leaf(node)]
         return sorted(nodes)

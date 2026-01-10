@@ -4,12 +4,11 @@ from .segmentation import Segmentation
 from ..heap.heap import UnionFind
 
 class BaseMergeTree(Tree):
-    def __init__(self, manager, type, contour=False, prune=False, segmentation=True):
+    def __init__(self, manager, type, prune=False, segmentation=True):
         super().__init__(type)
 
         self.manager = manager
         self.type = type
-        self.contour = contour
         self.prune = prune
         self.segmentation = segmentation
 
@@ -47,8 +46,6 @@ class BaseMergeTree(Tree):
 
         for node in degree_two_nodes:
             self.reduce_node(node, return_info=False)
-
-        self.manager.set_mandatory_points(self.type, non_degree_two_nodes)
 
         # if this function is called from outside
         self.prune = True
