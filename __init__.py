@@ -1,12 +1,11 @@
 from itertools import chain
 import pyvista as pv
 
-from . import branch, checker, debug, denoising, distances, field, formatter, hierarchy, heap, manager, pathfinder, point, simplification, tests, tree
+from . import branch, checker, debug, distances, field, formatter, hierarchy, heap, manager, pathfinder, point, simplification, tests, tree
 
 from .branch import *
 from .checker import *
 from .debug import *
-from .denoising import *
 from .distances import *
 from .field import *
 from .formatter import *
@@ -26,7 +25,6 @@ __all__ = list(
         branch.__all__,
         checker.__all__,
         debug.__all__,
-        denoising.__all__,
         distances.__all__,
         field.__all__,
         formatter.__all__,
