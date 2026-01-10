@@ -12,7 +12,6 @@ class FieldSimplification:
         self.field_name = field_name
         self.tree_type = tree_type
         self.removable_point = removable_point
-        self.removable_parent = removable_parent
 
         self.field_cutter = self.initialize_field_cutter(field, field_name, tree_type, removable_point, removable_parent)
 
@@ -36,15 +35,6 @@ class FieldSimplification:
         self.order_points = field_cutter.order_points
         self.patch_infinity_mesh = field_cutter.patch_infinity_mesh
         self.order_mesh = field_cutter.mesh
-
-        # self.order_field = Field(mesh=self.order_mesh)
-        # Finder.visualize(self.order_field, 'order')
-        #
-        # self.patch_mesh_before_infinity = field_cutter.patch_mesh
-        # self.patch_field_before_infinity = Field(mesh=self.patch_mesh_before_infinity)
-        # self.patch_points_before_infinity = FieldAnalyzer(self.patch_field_before_infinity, 'order').points
-        # self.patch_scalars_before_infinity = sorted([point.scalar for point in self.patch_points_before_infinity.values()], reverse=True)
-
 
 
         return field_cutter
