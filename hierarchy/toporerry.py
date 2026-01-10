@@ -36,7 +36,8 @@ class Toporerry:
             elif self.type == 'split':
                 reverse = False
 
-        visualize_branches_horizontal_toporerry(
-            self, base_dx, dy, circle_size,
-            flip, reverse, connector_linestyle, grid_color, grid_alpha
-        )
+        if self.scheme == 'height':
+            visualize_branches_horizontal_toporerry(
+                self, base_dx, dy, circle_size,
+                flip, reverse, connector_linestyle, grid_color, grid_alpha
+            )

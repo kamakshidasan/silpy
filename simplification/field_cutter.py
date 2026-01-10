@@ -7,7 +7,7 @@ from copy import deepcopy
 
 
 class FieldCutter:
-    def __init__(self, field, field_name, tree_type, removable_point):
+    def __init__(self, field, field_name, tree_type, removable_point, removable_parent):
         # cut out the order field patch of an extremum point using a reeb tree
 
         # There are five steps:
@@ -21,6 +21,7 @@ class FieldCutter:
         # ** just be careful, this only works for surface meshes for now**
 
         self.removable_point = removable_point
+        self.removable_parent = removable_parent
         self.tree_type = tree_type
 
         self.setup_order_field(field, field_name)
@@ -46,7 +47,6 @@ class FieldCutter:
         # save the mesh - this has order field and indices arrays defined on it
         self.mesh = self.order_field.mesh
 
-
     def find_patch_indices(self):
 
         # the extremum point that we received is from a different field
@@ -58,8 +58,8 @@ class FieldCutter:
         # find the index of the node
         removable_index = self.removable_point.index
 
-        # the point is an extremum, so has to be there in leaves or roots
-        candidate_nodes = self.order_tree.get_leaves() + self.order_tree.get_roots()
+        # the point is an extremum, so has to be there in leaves
+        candidate_nodes = self.order_tree.get_leaves()
 
         # find the node in the tree corresponding to the removable point
         extremum_node = [node for node in candidate_nodes if node.index == removable_index][0]
@@ -67,8 +67,17 @@ class FieldCutter:
         # store the point for eternity
         self.extremum_point = extremum_node
 
-        # find the parent of the node in the tree - there will be a parent
-        self.extremum_parent = self.order_tree.get_parents(self.extremum_point)[0]
+        # this could be any parent in the tree that is an internal node
+        removable_parent_index = self.removable_parent.index
+
+        # the parent is has to be an internal node
+        candidate_parent_nodes = self.order_tree.get_internal_nodes()
+
+        # find the node in the tree corresponding to the removable parent point
+        extremum_parent_node = [node for node in candidate_parent_nodes if node.index == removable_parent_index][0]
+
+        # store the point for eternity
+        self.extremum_parent = extremum_parent_node
 
         # find all the points in the segmentation
         arc = Segmentation.find_tree_arc_segmentation(self.extremum_point, self.extremum_parent, defaultdict(list))

@@ -7,13 +7,14 @@ from ..field.field_analyzer import FieldAnalyzer
 from ..simplification.field_orderer import FieldOrderer
 
 class FieldSimplification:
-    def __init__(self, field, field_name, tree_type, removable_point):
+    def __init__(self, field, field_name, tree_type, removable_point, removable_parent):
         self.field = field
         self.field_name = field_name
         self.tree_type = tree_type
         self.removable_point = removable_point
+        self.removable_parent = removable_parent
 
-        self.field_cutter = self.initialize_field_cutter(field, field_name, tree_type, removable_point)
+        self.field_cutter = self.initialize_field_cutter(field, field_name, tree_type, removable_point, removable_parent)
 
         self.finder = Finder(self.order_points, self.removable_parent, self.removable_point)
 
@@ -28,8 +29,8 @@ class FieldSimplification:
         self.final_field = self.apply_numeric_perturbation_from_order(self.flattened_field, self.new_order_field, self.field_name, make_increasing=True)
 
 
-    def initialize_field_cutter(self, field, field_name, tree_type, removable_point):
-        field_cutter = FieldCutter(field, field_name, tree_type, removable_point)
+    def initialize_field_cutter(self, field, field_name, tree_type, removable_point, removable_parent):
+        field_cutter = FieldCutter(field, field_name, tree_type, removable_point, removable_parent)
         self.field_cutter = field_cutter
         self.removable_parent = field_cutter.extremum_parent
         self.order_points = field_cutter.order_points
