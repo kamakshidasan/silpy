@@ -51,12 +51,12 @@ class BaseTree:
 
 ########################################################
 
-    def plot(self, mesh, style='tree', warp=False, warp_scale=8.0, show_tree=False, sphere_radius=0.7):
+    def plot(self, style='tree', warp=False, warp_scale=8.0, show_tree=False, sphere_radius=0.7):
         if style == 'sphere':
-            plot_warpable_sphere_segmentation(mesh, self.arcs, warp, warp_scale, sphere_radius)
+            plot_warpable_sphere_segmentation(self.manager.mesh, self.arcs, warp, warp_scale, sphere_radius)
         elif style == 'square':
-            plot_merge_tree_and_segmented_arcs(mesh, self, self.arcs, show_tree=show_tree)
+            plot_merge_tree_and_segmented_arcs(self.manager.mesh, self, self.arcs, show_tree=show_tree)
         else:
-            plot_warped_tree(mesh, self, warp_scale=(warp_scale if warp else 0.0))
+            plot_warped_tree(self.manager.mesh, self, warp_scale=(warp_scale if warp else 0.0))
 
 ########################################################
